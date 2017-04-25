@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:id="@+id/tv_back"
+        android:text="返回"
+        android:textSize="18sp"
+        android:textColor="#fff"
+        android:paddingLeft="15dp"
+        android:gravity="center_vertical"
+        android:background="#3F51B5"/>
+    <WebView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/wb_new"></WebView>
+</LinearLayout>
