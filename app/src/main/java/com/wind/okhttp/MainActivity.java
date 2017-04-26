@@ -1,20 +1,16 @@
 package com.wind.okhttp;
 
 import android.content.Intent;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.BaseAdapter;
-import android.widget.ImageButton;
-import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TextView;
+import android.widget.Toast;
 
-import com.bumptech.glide.Glide;
 import com.google.gson.Gson;
 import com.wind.okhttp.model.NewsBean;
 
@@ -28,12 +24,19 @@ import okhttp3.Response;
 public class MainActivity extends AppCompatActivity {
     private OkHttpClient client=new OkHttpClient();
     private ListView listView;
+    private Handler handler;
+    private List<NewsBean.Second.Third> list;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         listView= (ListView) findViewById(R.id.lv_loaddata);
+        if (!Utils.isNetworkAvailable(MainActivity.this))
+        {
+            Toast.makeText(MainActivity.this,"请检查网络",Toast.LENGTH_SHORT).show();
+        }
         loadData();
+        handler=new MyHandler();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -45,6 +48,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    class MyHandler extends  Handler
+    {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            Log.i(">>>>>>>",Thread.currentThread().getName());
+            list= (List<NewsBean.Second.Third>) msg.obj;
+            listView.setAdapter(new NewsListBaseAdapter(list,MainActivity.this));
+        }
+    }
+
 
     private void loadData() {
         final Gson gson =new Gson();
@@ -68,14 +82,21 @@ public class MainActivity extends AppCompatActivity {
                                 NewsBean.Second second=newsBean.result;
                                 final List<NewsBean.Second.Third> list=second.data;
                                 //在主线程更新UI
-                                runOnUiThread(new Runnable() {
-                                        @Override
-                                         public void run() {
-                                       listView.setAdapter(new NewsListBaseAdapter(list,MainActivity.this));
-                                    }
-                                });
-
-
+//                                runOnUiThread(new Runnable() {
+//                                        @Override
+//                                         public void run() {
+//                                       listView.setAdapter(new NewsListBaseAdapter(list,MainActivity.this));
+//                                    }
+//                                });
+                        Message msg=handler.obtainMessage();
+                        msg.obj=list;
+                        handler.sendMessage(msg);//sendMessage()方法，在主线程或者Worker Thread线程中发送，都是可以的，都可以被取到
+//                            listView.post(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    listView.setAdapter(new NewsListBaseAdapter(list,MainActivity.this));
+//                                }
+//                            });
                                 String title=list.get(1).title;
                               Log.i(">>>>>>>>>>>>>>>>>>",title);
 
